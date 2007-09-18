@@ -1,0 +1,32 @@
+The simplest possible configuration
+
+  If you want to create the application bundle as a part of Maven's build cycle you must configure the plugin in your POM.
+
+  This example show the simplest possible configuration. The only required configuration property is  <<<\<mainClass\>>>>.
+
++------------------------------------------+
+ <project>
+    ...
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>osxappbundle-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>com.example.Main</mainClass>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>bundle</goal>
+                        </goals>
+                    </execution>
+               </executions>
+           </plugin>
+           ...
+       </plugins>
+   <build>
+   ...
+ </project>
++------------------------------------------+
