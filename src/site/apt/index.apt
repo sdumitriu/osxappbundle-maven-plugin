@@ -11,7 +11,7 @@ OS X Application Bundle Plugin
 
 * Goals Overview
 
-  * {{{bundle.html}osxappbundle:bundle}} Create an application bundle and put it in a DMG/ZIP
+  * {{{bundle-mojo.html}osxappbundle:bundle}} Create an application bundle and put it in a DMG/ZIP
 
 * Examples
 

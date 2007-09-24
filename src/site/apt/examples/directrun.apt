@@ -4,9 +4,19 @@ Running the plugin from the command line
 
 +------------------------------------------+
 
-  mvn package osxappbundle:bundle -DmainClass=<YOUR MAIN CLASS HERE>
+  mvn package osxappbundle:bundle
 
 +------------------------------------------+
 
   This will produce an Application Bundle and a .dmg in the target/ directory.
+
+  If you do not specify which main class to use, the plugin will try to find one in your classes and dependencies.
+  However, it's probably smart to be explicit about which class to run:
+
++------------------------------------------+
+
+  mvn package osxappbundle:bundle -DmainClass=com.example.Main
+
++------------------------------------------+
+
 

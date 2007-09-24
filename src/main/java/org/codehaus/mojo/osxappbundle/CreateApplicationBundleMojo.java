@@ -27,6 +27,8 @@ import org.apache.velocity.exception.ParseErrorException;
 import org.apache.velocity.exception.ResourceNotFoundException;
 import org.codehaus.plexus.archiver.ArchiverException;
 import org.codehaus.plexus.archiver.zip.ZipArchiver;
+import org.codehaus.plexus.mainclass.MainClass;
+import org.codehaus.plexus.mainclass.MainClassFinder;
 import org.codehaus.plexus.util.DirectoryScanner;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.cli.CommandLineException;
@@ -54,6 +56,7 @@ public class CreateApplicationBundleMojo
 
     /**
      * The Maven Project Object
+     *
      * @parameter expression="${project}"
      */
     private MavenProject project;
@@ -84,7 +87,6 @@ public class CreateApplicationBundleMojo
      * The main class to execute when double-clicking the Application Bundle
      *
      * @parameter expression="${mainClass}"
-     * @required
      */
     private String mainClass;
 
@@ -105,18 +107,21 @@ public class CreateApplicationBundleMojo
 
     /**
      * The version of the project. Will be used as the value of the CFBundleVersion key.
+     *
      * @parameter expression="${project.version}"
      */
     private String version;
 
     /**
      * A value for the JVMVersion key.
+     *
      * @parameter default-value="1.4+"
      */
     private String jvmVersion;
 
     /**
      * The location of the produced Zip file containing the bundle.
+     *
      * @parameter expression="${project.build.directory}/${project.build.finalName}-app.zip"
      */
     private File zipFile;
@@ -126,6 +131,7 @@ public class CreateApplicationBundleMojo
      * Might be useful to specifiy locations of dependencies in the provided scope that are not distributed with
      * the bundle but have a known location on the system.
      * {@see http://jira.codehaus.org/browse/MOJO-874}
+     *
      * @parameter
      */
     private List additionalClasspath;
@@ -133,11 +139,18 @@ public class CreateApplicationBundleMojo
     /**
      * Velocity Component.
      *
-     * @component role="org.codehaus.plexus.velocity.VelocityComponent"
+     * @component role="org.codehaus.plexus.velocity.VelocityComponent" role-hint="default"
      * @readonly
      */
     private VelocityComponent velocity;
 
+    /**
+     * Main class finder.
+     *
+     * @parameter expression="${component.org.codehaus.plexus.mainclass.MainClassFinder#default}"
+     * @readonly
+     */
+    private MainClassFinder mainClassFinder;
 
     /**
      * The location of the template for Info.plist.
@@ -211,8 +224,8 @@ public class CreateApplicationBundleMojo
         File infoPlist = new File( buildDirectory, "Contents/Info.plist" );
         writeInfoPlist( infoPlist, files );
 
-
-        if(isOsX()){
+        if ( isOsX() )
+        {
             // Make the stub executable
             Commandline chmod = new Commandline();
             try
@@ -227,7 +240,6 @@ public class CreateApplicationBundleMojo
             {
                 throw new MojoExecutionException( "Error executing " + chmod + " ", e );
             }
-
 
             // This makes sure that the .app dir is actually registered as an application bundle
             Commandline setFile = new Commandline();
@@ -261,32 +273,34 @@ public class CreateApplicationBundleMojo
             }
         }
 
-        zipArchiver.setDestFile( zipFile);
+        zipArchiver.setDestFile( zipFile );
         try
         {
-            zipArchiver.addDirectory( buildDirectory.getParentFile(), new String[] {buildDirectory.getName() +"/**"}, new String[] {"**/JavaApplicationStub"});
+            zipArchiver.addDirectory( buildDirectory.getParentFile(), new String[]{buildDirectory.getName() + "/**"},
+                                      new String[]{"**/JavaApplicationStub"} );
 
             DirectoryScanner scanner = new DirectoryScanner();
-            scanner.setBasedir( buildDirectory.getParentFile());
-            scanner.setIncludes( new String[] {buildDirectory.getName() +"/**/JavaApplicationStub"});
+            scanner.setBasedir( buildDirectory.getParentFile() );
+            scanner.setIncludes( new String[]{buildDirectory.getName() + "/**/JavaApplicationStub"} );
             scanner.scan();
 
             String[] stubs = scanner.getIncludedFiles();
             for ( int i = 0; i < stubs.length; i++ )
             {
                 String s = stubs[i];
-                zipArchiver.addFile( new File(buildDirectory.getParentFile(), s), s, 0755);
+                zipArchiver.addFile( new File( buildDirectory.getParentFile(), s ), s, 0755 );
             }
 
             zipArchiver.createArchive();
         }
         catch ( ArchiverException e )
         {
-            throw new MojoExecutionException( "Could not create zip archive of application bundle in " +zipFile, e);
+            throw new MojoExecutionException( "Could not create zip archive of application bundle in " + zipFile, e );
         }
         catch ( IOException e )
         {
-            throw new MojoExecutionException( "IOException creating zip archive of application bundle in " +zipFile, e);
+            throw new MojoExecutionException( "IOException creating zip archive of application bundle in " + zipFile,
+                                              e );
         }
 
 
@@ -294,7 +308,7 @@ public class CreateApplicationBundleMojo
 
     private boolean isOsX()
     {
-        return System.getProperty( "mrj.version") != null;
+        return System.getProperty( "mrj.version" ) != null;
     }
 
     /**
@@ -347,9 +361,7 @@ public class CreateApplicationBundleMojo
             list.add( file.getName() );
         }
 
-
-
-    return list;
+        return list;
 
     }
 
@@ -366,16 +378,46 @@ public class CreateApplicationBundleMojo
 
         VelocityContext velocityContext = new VelocityContext();
 
-        velocityContext.put( "mainClass", mainClass );
+        if ( mainClass != null )
+        {
+            velocityContext.put( "mainClass", mainClass );
+        }
+        else
+        {
+            getLog().info( "No mainClass parameter specified, scanning classes.." );
+            List mainClasses = findMainClasses();
+            if ( mainClasses.size() == 0 )
+            {
+                throw new MojoExecutionException(
+                    "You did not specify a mainClass and class with a main class could be found" );
+            }
+            else
+            {
+                getLog().info( "Found main classes " + mainClasses.toString() );
+                MainClass mainClass = (MainClass) mainClasses.get( 0 );
+                if ( mainClass.getClassLocation().isDirectory() )
+                {
+                    getLog().info(
+                        "Using main class " + mainClass.getClassName() + " from " + mainClass.getClassLocation() );
+                }
+                else
+                {
+                    Artifact artifact = getArtifact( mainClass.getClassLocation() );
+                    getLog().info( "Using main class " + mainClass.getClassName() + " from " + artifact.toString() +
+                        " in " + artifact.getFile() );
+                }
+                velocityContext.put( "mainClass", mainClass.getClassName() );
+            }
+        }
 
         velocityContext.put( "bundleName", bundleName );
 
         velocityContext.put( "iconFile", iconFile == null ? "GenericJavaApp.icns" : iconFile.getName() );
 
-        velocityContext.put( "version", version);
+        velocityContext.put( "version", version );
 
-        velocityContext.put( "jvmVersion", jvmVersion);
-        
+        velocityContext.put( "jvmVersion", jvmVersion );
+
         StringBuffer jarFilesBuffer = new StringBuffer();
 
         jarFilesBuffer.append( "<array>" );
@@ -387,11 +429,13 @@ public class CreateApplicationBundleMojo
             jarFilesBuffer.append( "</string>" );
 
         }
-        if(additionalClasspath != null) {
-            for (int i = 0; i < additionalClasspath.size(); i++) {
-                String pathElement = (String) additionalClasspath.get(i);
+        if ( additionalClasspath != null )
+        {
+            for ( int i = 0; i < additionalClasspath.size(); i++ )
+            {
+                String pathElement = (String) additionalClasspath.get( i );
                 jarFilesBuffer.append( "<string>" );
-                jarFilesBuffer.append( pathElement);
+                jarFilesBuffer.append( pathElement );
                 jarFilesBuffer.append( "</string>" );
 
             }
@@ -429,5 +473,40 @@ public class CreateApplicationBundleMojo
             throw new MojoExecutionException( "Exception occured merging Info.plist template " + dictionaryFile, e );
         }
 
+    }
+
+    /**
+     * Search for the artifact owning artifactFile
+     * @param artifactFile
+     * @return the artifact or <code>null</code> if no matching artifact was found.
+     */
+    private Artifact getArtifact( File artifactFile )
+    {
+        for ( Iterator i = project.getArtifacts().iterator(); i.hasNext(); )
+        {
+            Artifact artifact = (Artifact) i.next();
+            if ( artifactFile.equals( artifact.getFile() ) )
+            {
+                return artifact;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Sets up a classpath with project classes followed by dependency classes and uses a MainClassFinder to
+     * search for main classes.
+     * @return
+     */
+    private List findMainClasses()
+    {
+        List classPath = new ArrayList();
+        classPath.add( project.getArtifact().getFile() );
+        for ( Iterator i = project.getArtifacts().iterator(); i.hasNext(); )
+        {
+            Artifact artifact = (Artifact) i.next();
+            classPath.add( artifact.getFile() );
+        }
+        return mainClassFinder.findMainClasses( classPath );
     }
 }
