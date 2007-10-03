@@ -28,6 +28,10 @@
       <string>${jvmVersion}</string>
       <key>ClassPath</key>
       ${classpath}
+      #if($vmOptions)
+      <key>VMOptions</key>
+      <string>${vmOptions}</string>
+      #end
     </dict>
   </dict>
 </plist>

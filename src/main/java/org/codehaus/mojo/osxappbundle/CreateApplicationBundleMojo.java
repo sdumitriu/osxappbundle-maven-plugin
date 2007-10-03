@@ -161,6 +161,14 @@ public class CreateApplicationBundleMojo
     private String dictionaryFile;
 
     /**
+     * Options to the JVM, will be used as the value of VMOptions in Info.plist.
+     *
+     * @parameter expression="${vmOptions}"
+     */
+    private String vmOptions;
+
+
+    /**
      * The Zip archiver.
      *
      * @parameter expression="${component.org.codehaus.plexus.archiver.Archiver#zip}"
@@ -410,6 +418,7 @@ public class CreateApplicationBundleMojo
             }
         }
 
+        velocityContext.put( "vmOptions", vmOptions);
         velocityContext.put( "bundleName", bundleName );
 
         velocityContext.put( "iconFile", iconFile == null ? "GenericJavaApp.icns" : iconFile.getName() );

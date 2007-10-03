@@ -1,0 +1,27 @@
+<document>
+	<properties>
+		<title>Maven OS X Application Bundle plugin changelog</title>
+		<author email="eirbjo at gmail dot com">
+			Eirik Bjorsnos
+		</author>
+	</properties>
+	<body>
+		<release version="1.0-alpha-2-SNAPSHOT" date="in SVN">
+      <action dev="eirbjo" type="add">
+				Added vmOptions parameter that can be used to give parameters to the JVM.
+			</action>
+      <action dev="eirbjo" type="add">
+				Use plexus-mainclass-finder to automatically find a main class if none is configured.
+			</action>
+      <action dev="eirbjo" type="add" issue="MOJO-874" due-to="Paul Smith">
+				Ability to add custom classpath elements.
+			</action>
+      <action dev="eirbjo" type="fix">
+				Upgrade to Mojo parent pom 16 that includes site template.
+			</action>
+    </release>
+		<release version="1.0-alpha-1" date="2007-09-18"
+			description="First public release">
+		</release>
+	</body>
+</document>
