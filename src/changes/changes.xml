@@ -8,6 +8,9 @@
 	<body>
 		<release version="1.0-alpha-2-SNAPSHOT" date="in SVN">
       <action dev="eirbjo" type="add">
+				dictionaryFile must now be absolute, like this: ${basedir}/src/resources/Info.plist.template.
+			</action>
+      <action dev="eirbjo" type="add">
 				Added vmOptions parameter that can be used to give parameters to the JVM.
 			</action>
       <action dev="eirbjo" type="add">

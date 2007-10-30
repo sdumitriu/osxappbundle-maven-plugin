@@ -20,6 +20,10 @@
             <name>file.resource.loader.class</name>
             <value>org.apache.velocity.runtime.resource.loader.FileResourceLoader</value>
           </property>
+          <property>
+            <name>file.resource.loader.path</name>
+            <value></value>
+          </property>
         </properties>
       </configuration>
     </component>
