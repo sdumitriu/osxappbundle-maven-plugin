@@ -411,8 +411,12 @@ public class CreateApplicationBundleMojo
                 else
                 {
                     Artifact artifact = getArtifact( mainClass.getClassLocation() );
-                    getLog().info( "Using main class " + mainClass.getClassName() + " from " + artifact.toString() +
-                        " in " + artifact.getFile() );
+                    if(artifact == null) {
+                           getLog().info( "Using main class " + mainClass.getClassName());
+                    } else {
+                        getLog().info( "Using main class " + mainClass.getClassName() + " from " + artifact.toString() +
+                            " in " + artifact.getFile() );
+                    }
                 }
                 velocityContext.put( "mainClass", mainClass.getClassName() );
             }
