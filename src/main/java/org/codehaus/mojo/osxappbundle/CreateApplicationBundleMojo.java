@@ -177,6 +177,15 @@ public class CreateApplicationBundleMojo
     private ZipArchiver zipArchiver;
 
     /**
+     * If this is set to <code>true</code>, the generated DMG file will be internet-enabled.
+     * The default is ${false}
+     *
+     * @parameter expression="${internetEnable}" default-value="false"
+     */
+    private boolean internetEnable;
+
+
+    /**
      * Bundle project as a Mac OS X application bundle.
      *
      * @throws MojoExecutionException If an unexpected error occurs during packaging of the bundle.
@@ -278,6 +287,21 @@ public class CreateApplicationBundleMojo
             catch ( CommandLineException e )
             {
                 throw new MojoExecutionException( "Error creating disk image " + diskImageFile, e );
+            }
+            if(internetEnable) {
+                try {
+
+                    Commandline internetEnable = new Commandline();
+
+                    internetEnable.setExecutable("hdiutil");
+                    internetEnable.createArgument().setValue("internet-enable" );
+                    internetEnable.createArgument().setValue("-yes");
+                    internetEnable.createArgument().setValue(diskImageFile.getAbsolutePath());
+
+                    internetEnable.execute();
+                } catch (CommandLineException e) {
+                    throw new MojoExecutionException("Error internet enabling disk image: " + diskImageFile, e);
+                }
             }
         }
 
