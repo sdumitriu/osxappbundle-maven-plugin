@@ -9,7 +9,7 @@
     <key>CFBundleAllowMixedLocalizations</key>
     <string>true</string>
     <key>CFBundleExecutable</key>
-    <string>JavaApplicationStub</string>
+    <string>${cfBundleExecutable}</string>
     <key>CFBundleDevelopmentRegion</key>
     <string>English</string>
     <key>CFBundlePackageType</key>

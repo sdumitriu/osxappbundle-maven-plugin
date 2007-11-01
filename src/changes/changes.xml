@@ -7,6 +7,9 @@
 	</properties>
 	<body>
 		<release version="1.0-alpha-2-SNAPSHOT" date="in SVN">
+      <action dev="eirbjo" type="add" due-to="Oleksandr Maksymchuk" issue="MOJO-946">
+        Make the CFBundleExecutable name follow the name of the JavaApplicationStub.
+      </action>
       <action dev="eirbjo" type="add" due-to="Oleksandr Maksymchuk" issue="MOJO-945">
 				Add flag to internet-enable the DMG.
 			</action>

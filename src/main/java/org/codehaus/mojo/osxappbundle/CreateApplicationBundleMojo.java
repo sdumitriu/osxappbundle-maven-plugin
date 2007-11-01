@@ -210,7 +210,7 @@ public class CreateApplicationBundleMojo
         macOSDirectory.mkdirs();
 
         // Copy in the native java application stub
-        File stub = new File( macOSDirectory, "JavaApplicationStub" );
+        File stub = new File( macOSDirectory, javaApplicationStub.getName() );
         try
         {
             FileUtils.copyFile( javaApplicationStub, stub );
@@ -446,6 +446,7 @@ public class CreateApplicationBundleMojo
             }
         }
 
+        velocityContext.put( "cfBundleExecutable", javaApplicationStub.getName());
         velocityContext.put( "vmOptions", vmOptions);
         velocityContext.put( "bundleName", bundleName );
 
