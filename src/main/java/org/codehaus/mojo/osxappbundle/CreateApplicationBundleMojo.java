@@ -282,7 +282,14 @@ public class CreateApplicationBundleMojo
                 dmg.createArgument().setValue( "-srcfolder" );
                 dmg.createArgument().setValue( buildDirectory.getAbsolutePath() );
                 dmg.createArgument().setValue( diskImageFile.getAbsolutePath() );
-                dmg.execute();
+                try
+                {
+                    dmg.execute().waitFor();
+                }
+                catch ( InterruptedException e )
+                {
+                    throw new MojoExecutionException( "Thread was interrupted while creating DMG " + diskImageFile, e );
+                }
             }
             catch ( CommandLineException e )
             {
