@@ -315,12 +315,14 @@ public class CreateApplicationBundleMojo
         zipArchiver.setDestFile( zipFile );
         try
         {
+            String[] stubPattern = {buildDirectory.getName() +"/Contents/MacOS/" + javaApplicationStub.getName()};
+
             zipArchiver.addDirectory( buildDirectory.getParentFile(), new String[]{buildDirectory.getName() + "/**"},
-                                      new String[]{"**/JavaApplicationStub"} );
+                    stubPattern);
 
             DirectoryScanner scanner = new DirectoryScanner();
             scanner.setBasedir( buildDirectory.getParentFile() );
-            scanner.setIncludes( new String[]{buildDirectory.getName() + "/**/JavaApplicationStub"} );
+            scanner.setIncludes( stubPattern);
             scanner.scan();
 
             String[] stubs = scanner.getIncludedFiles();
