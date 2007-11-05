@@ -18,6 +18,8 @@ package org.codehaus.mojo.osxappbundle;
 
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.repository.layout.ArtifactRepositoryLayout;
+import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
@@ -363,15 +365,20 @@ public class CreateApplicationBundleMojo
         throws MojoExecutionException
     {
 
+        ArtifactRepositoryLayout layout = new DefaultRepositoryLayout();
+        
         List list = new ArrayList();
+
+        File repoDirectory = new File(javaDirectory, "repo");
+        repoDirectory.mkdirs();
 
         // First, copy the project's own artifact
         File artifactFile = project.getArtifact().getFile();
-        list.add( artifactFile.getName() );
+        list.add( repoDirectory.getName() +"/" +layout.pathOf(project.getArtifact()));
 
         try
         {
-            FileUtils.copyFileToDirectory( artifactFile, javaDirectory );
+            FileUtils.copyFile( artifactFile, new File(repoDirectory, layout.pathOf(project.getArtifact())) );
         }
         catch ( IOException e )
         {
@@ -387,19 +394,20 @@ public class CreateApplicationBundleMojo
             Artifact artifact = (Artifact) i.next();
 
             File file = artifact.getFile();
+            File dest = new File(repoDirectory, layout.pathOf(artifact));
 
             getLog().debug( "Adding " + file );
 
             try
             {
-                FileUtils.copyFileToDirectory( file, javaDirectory );
+                FileUtils.copyFile( file, dest);
             }
             catch ( IOException e )
             {
                 throw new MojoExecutionException( "Error copying file " + file + " into " + javaDirectory, e );
             }
 
-            list.add( file.getName() );
+            list.add( repoDirectory.getName() +"/" + layout.pathOf(artifact) );
         }
 
         return list;
