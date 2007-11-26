@@ -23,6 +23,7 @@ import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.MavenProjectHelper;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.exception.MethodInvocationException;
 import org.apache.velocity.exception.ParseErrorException;
@@ -173,6 +174,13 @@ public class CreateApplicationBundleMojo
     /**
      * The Zip archiver.
      *
+     * @component
+     */
+    private MavenProjectHelper projectHelper;
+
+    /**
+     * The Zip archiver.
+     *
      * @parameter expression="${component.org.codehaus.plexus.archiver.Archiver#zip}"
      * @required
      */
@@ -312,6 +320,7 @@ public class CreateApplicationBundleMojo
                     throw new MojoExecutionException("Error internet enabling disk image: " + diskImageFile, e);
                 }
             }
+            projectHelper.attachArtifact(project, "dmg", null, diskImageFile);
         }
 
         zipArchiver.setDestFile( zipFile );
@@ -335,6 +344,7 @@ public class CreateApplicationBundleMojo
             }
 
             zipArchiver.createArchive();
+            projectHelper.attachArtifact(project, "zip", null, zipFile);
         }
         catch ( ArchiverException e )
         {
