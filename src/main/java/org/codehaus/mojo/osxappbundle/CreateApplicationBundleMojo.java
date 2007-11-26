@@ -142,7 +142,7 @@ public class CreateApplicationBundleMojo
     /**
      * Velocity Component.
      *
-     * @component role="org.codehaus.plexus.velocity.VelocityComponent" role-hint="default"
+     * @component
      * @readonly
      */
     private VelocityComponent velocity;
@@ -376,7 +376,7 @@ public class CreateApplicationBundleMojo
     {
 
         ArtifactRepositoryLayout layout = new DefaultRepositoryLayout();
-        
+
         List list = new ArrayList();
 
         File repoDirectory = new File(javaDirectory, "repo");
