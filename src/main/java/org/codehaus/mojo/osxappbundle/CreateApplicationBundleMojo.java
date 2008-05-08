@@ -194,6 +194,11 @@ public class CreateApplicationBundleMojo
      */
     private boolean internetEnable;
 
+    /**
+     * The path to the SetFile tool.
+     */
+    private static final String SET_FILE_PATH = "/Developer/Tools/SetFile";
+
 
     /**
      * Bundle project as a Mac OS X application bundle.
@@ -269,20 +274,26 @@ public class CreateApplicationBundleMojo
             }
 
             // This makes sure that the .app dir is actually registered as an application bundle
-            Commandline setFile = new Commandline();
-            try
+            if ( new File( SET_FILE_PATH ).exists() )
             {
-                setFile.setExecutable( "/Developer/Tools/SetFile" );
-                setFile.createArgument().setValue( "-a B" );
-                setFile.createArgument().setValue( buildDirectory.getAbsolutePath() );
+                Commandline setFile = new Commandline();
+                try
+                {
+                    setFile.setExecutable(SET_FILE_PATH);
+                    setFile.createArgument().setValue( "-a B" );
+                    setFile.createArgument().setValue( buildDirectory.getAbsolutePath() );
 
-                setFile.execute();
+                    setFile.execute();
+                }
+                catch ( CommandLineException e )
+                {
+                    throw new MojoExecutionException( "Error executing " + setFile, e );
+                }
             }
-            catch ( CommandLineException e )
+            else
             {
-                throw new MojoExecutionException( "Error executing " + setFile, e );
+                getLog().warn( "Could  not set 'Has Bundle' attribute. " +SET_FILE_PATH +" not found, is Developer Tools installed?" );
             }
-
             // Create a .dmg file of the app
             Commandline dmg = new Commandline();
             try
