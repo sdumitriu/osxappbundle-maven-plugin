@@ -45,6 +45,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.Arrays;
 
 /**
  * Package dependencies as an Application Bundle for Mac OS X.
@@ -58,6 +59,11 @@ public class CreateApplicationBundleMojo
 {
 
     /**
+     * Default includes - everything is included.
+     */
+    private static final String[] DEFAULT_INCLUDES = {"**/**"};
+
+    /**
      * The Maven Project Object
      *
      * @parameter expression="${project}"
@@ -67,7 +73,7 @@ public class CreateApplicationBundleMojo
     /**
      * The directory where the application bundle will be created
      *
-     * @parameter expression="${project.build.directory}/${project.build.finalName}.app";
+     * @parameter expression="${project.build.directory}/${project.build.finalName}";
      */
     private File buildDirectory;
 
@@ -94,12 +100,14 @@ public class CreateApplicationBundleMojo
     private String mainClass;
 
     /**
-     * The name of the Bundle. This is what will show up in the application menu, dock etc.
+     * The name of the Bundle. This is the name that is given to the application bundle;
+     * and it is also what will show up in the application menu, dock etc.
      *
      * @parameter default-value="${project.name}"
      * @required
      */
     private String bundleName;
+
 
     /**
      * The icon file for the bundle
@@ -138,6 +146,15 @@ public class CreateApplicationBundleMojo
      * @parameter
      */
     private List additionalClasspath;
+
+    /**
+     * Additional resources (as a list of FileSet objects) that will be copies into
+     * the build directory and included in the .dmg and zip files alongside with the
+     * application bundle.
+     *
+     * @parameter
+     */
+    private List additionalResources;
 
     /**
      * Velocity Component.
@@ -212,7 +229,10 @@ public class CreateApplicationBundleMojo
         // Set up and create directories
         buildDirectory.mkdirs();
 
-        File contentsDir = new File( buildDirectory, "Contents" );
+        File bundleDir = new File( buildDirectory, bundleName + ".app" );
+        bundleDir.mkdirs();
+
+        File contentsDir = new File( bundleDir, "Contents" );
         contentsDir.mkdirs();
 
         File resourcesDir = new File( contentsDir, "Resources" );
@@ -253,8 +273,14 @@ public class CreateApplicationBundleMojo
         List files = copyDependencies( javaDirectory );
 
         // Create and write the Info.plist file
-        File infoPlist = new File( buildDirectory, "Contents/Info.plist" );
+        File infoPlist = new File( bundleDir, "Contents/Info.plist" );
         writeInfoPlist( infoPlist, files );
+
+        // Copy specified additional resources into the top level directory
+        if (additionalResources != null && !additionalResources.isEmpty())
+        {
+            copyResources( additionalResources );
+        }
 
         if ( isOsX() )
         {
@@ -281,7 +307,7 @@ public class CreateApplicationBundleMojo
                 {
                     setFile.setExecutable(SET_FILE_PATH);
                     setFile.createArgument().setValue( "-a B" );
-                    setFile.createArgument().setValue( buildDirectory.getAbsolutePath() );
+                    setFile.createArgument().setValue( bundleDir.getAbsolutePath() );
 
                     setFile.execute();
                 }
@@ -337,7 +363,8 @@ public class CreateApplicationBundleMojo
         zipArchiver.setDestFile( zipFile );
         try
         {
-            String[] stubPattern = {buildDirectory.getName() +"/Contents/MacOS/" + javaApplicationStub.getName()};
+            String[] stubPattern = {buildDirectory.getName() + "/" + bundleDir.getName() +"/Contents/MacOS/"
+                                    + javaApplicationStub.getName()};
 
             zipArchiver.addDirectory( buildDirectory.getParentFile(), new String[]{buildDirectory.getName() + "/**"},
                     stubPattern);
@@ -585,4 +612,84 @@ public class CreateApplicationBundleMojo
         }
         return mainClassFinder.findMainClasses( classPath );
     }
+
+    /**
+     * Copies given resources to the build directory. 
+     *
+     * @param fileSets A list of FileSet objects that represent additional resources to copy.
+     * @throws MojoExecutionException In case af a resource copying error.
+     */
+    private void copyResources( List fileSets )
+        throws MojoExecutionException
+    {
+        final String[] emptyStrArray = {};
+        
+        for ( Iterator it = fileSets.iterator(); it.hasNext(); )
+        {
+            FileSet fileSet = (FileSet) it.next();
+
+            File resourceDirectory = new File( fileSet.getDirectory() );
+            if ( !resourceDirectory.isAbsolute() )
+            {
+                resourceDirectory = new File( project.getBasedir(), resourceDirectory.getPath() );
+            }
+
+            if ( !resourceDirectory.exists() )
+            {
+                getLog().info( "Additional resource directory does not exist: " + resourceDirectory );
+                continue;
+            }
+
+            DirectoryScanner scanner = new DirectoryScanner();
+
+            scanner.setBasedir( resourceDirectory );
+            if ( fileSet.getIncludes() != null && !fileSet.getIncludes().isEmpty() )
+            {
+                scanner.setIncludes( (String[]) fileSet.getIncludes().toArray( emptyStrArray ) );
+            }
+            else
+            {
+                scanner.setIncludes( DEFAULT_INCLUDES );
+            }
+
+            if ( fileSet.getExcludes() != null && !fileSet.getExcludes().isEmpty() )
+            {
+                scanner.setExcludes( (String[]) fileSet.getExcludes().toArray( emptyStrArray ) );
+            }
+
+            if (fileSet.isUseDefaultExcludes())
+            {
+                scanner.addDefaultExcludes();
+            }
+
+            scanner.scan();
+
+            List includedFiles = Arrays.asList( scanner.getIncludedFiles() );
+
+            getLog().info( "Copying " + includedFiles.size() + " additional resource"
+                           + ( includedFiles.size() > 1 ? "s" : "" ) );
+
+            for ( Iterator j = includedFiles.iterator(); j.hasNext(); )
+            {
+                String destination = (String) j.next();
+                File source = new File( resourceDirectory, destination );
+                File destinationFile = new File( buildDirectory, destination );
+
+                if ( !destinationFile.getParentFile().exists() )
+                {
+                    destinationFile.getParentFile().mkdirs();
+                }
+
+                try
+                {
+                    FileUtils.copyFile(source, destinationFile);
+                }
+                catch ( IOException e )
+                {
+                    throw new MojoExecutionException( "Error copying additional resource " + source, e );
+                }
+            }
+        }
+    }
+
 }
