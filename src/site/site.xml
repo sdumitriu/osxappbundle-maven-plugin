@@ -21,6 +21,9 @@
       <item name="Custom Info.plist" href="examples/custom-dictionary.html"/>
       <item name="Additional resources" href="examples/additional-resources.html"/>
     </menu>
-    
+
+    <menu name="Howto">
+      <item name="Custom Finder view" href="howtos/ds-store.html"/>
+    </menu>
   </body>
 </project>
