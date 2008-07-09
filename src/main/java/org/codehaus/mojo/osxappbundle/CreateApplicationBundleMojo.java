@@ -246,14 +246,25 @@ public class CreateApplicationBundleMojo
 
         // Copy in the native java application stub
         File stub = new File( macOSDirectory, javaApplicationStub.getName() );
-        try
-        {
-            FileUtils.copyFile( javaApplicationStub, stub );
-        }
-        catch ( IOException e )
-        {
-            throw new MojoExecutionException(
-                "Could not copy file " + javaApplicationStub + " to directory " + macOSDirectory, e );
+        if(! javaApplicationStub.exists()) {
+            String message = "Can't find JavaApplicationStub binary. File does not exist: " + javaApplicationStub;
+
+            if(! isOsX() ) {
+                message += "\nNOTICE: You are running the osxappbundle plugin on a non OS X platform. To make this work you need to copy the JavaApplicationStub binary into your source tree. Then configure it with the 'javaApplicationStub' configuration property.\nOn an OS X machine, the JavaApplicationStub is typically located under /System/Library/Frameworks/JavaVM.framework/Versions/Current/Resources/MacOS/JavaApplicationStub";
+            }
+
+            throw new MojoExecutionException( message);
+            
+        } else {
+            try
+            {
+                FileUtils.copyFile( javaApplicationStub, stub );
+            }
+            catch ( IOException e )
+            {
+                throw new MojoExecutionException(
+                    "Could not copy file " + javaApplicationStub + " to directory " + macOSDirectory, e );
+            }
         }
 
         // Copy icon file to the bundle if specified
