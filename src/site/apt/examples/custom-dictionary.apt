@@ -17,6 +17,7 @@ Using a custom Info.plist file
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>osxappbundle-maven-plugin</artifactId>
+                <version>1.0-alpha-1</version>
                 <configuration>
                     <mainClass>com.example.Main</mainClass>
                     <dictionaryFile>${basedir}/src/main/app-resources/Info.plist</dictionaryFile>
@@ -49,7 +50,7 @@ ${classpath}   (An <array> containing all you classpath entries, used as the val
 
 Info.plist example
 
-    This example how how to set VM options and system propertie using a custom Info.plist file.
+    This example shows how to set VM options and system properties using a custom Info.plist file.
 
 +------------------------------------------+
 <?xml version="1.0" encoding="UTF-8"?>

@@ -1,7 +1,7 @@
 package org.codehaus.mojo.osxappbundle;
 
 /*
- * Copyright 2001-2006 The Codehaus.
+ * Copyright 2001-2008 The Codehaus.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,17 +30,21 @@ import org.apache.velocity.exception.ParseErrorException;
 import org.apache.velocity.exception.ResourceNotFoundException;
 import org.codehaus.plexus.archiver.ArchiverException;
 import org.codehaus.plexus.archiver.zip.ZipArchiver;
-import org.codehaus.plexus.mainclass.MainClass;
-import org.codehaus.plexus.mainclass.MainClassFinder;
 import org.codehaus.plexus.util.DirectoryScanner;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.cli.CommandLineException;
 import org.codehaus.plexus.util.cli.Commandline;
 import org.codehaus.plexus.velocity.VelocityComponent;
+import org.codehaus.mojo.osxappbundle.encoding.DefaultEncodingDetector;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.StringWriter;
+import java.io.ByteArrayInputStream;
+import java.io.Writer;
+import java.io.OutputStreamWriter;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -66,21 +70,22 @@ public class CreateApplicationBundleMojo
     /**
      * The Maven Project Object
      *
-     * @parameter expression="${project}"
+     * @parameter default-value="${project}"
+     * @readonly
      */
     private MavenProject project;
 
     /**
      * The directory where the application bundle will be created
      *
-     * @parameter expression="${project.build.directory}/${project.build.finalName}";
+     * @parameter default-value="${project.build.directory}/${project.build.finalName}";
      */
     private File buildDirectory;
 
     /**
      * The location of the generated disk image file
      *
-     * @parameter expression="${project.build.directory}/${project.build.finalName}.dmg"
+     * @parameter default-value="${project.build.directory}/${project.build.finalName}.dmg"
      */
     private File diskImageFile;
 
@@ -88,7 +93,7 @@ public class CreateApplicationBundleMojo
     /**
      * The location of the Java Application Stub
      *
-     * @parameter expression="/System/Library/Frameworks/JavaVM.framework/Versions/Current/Resources/MacOS/JavaApplicationStub";
+     * @parameter default-value="/System/Library/Frameworks/JavaVM.framework/Versions/Current/Resources/MacOS/JavaApplicationStub";
      */
     private File javaApplicationStub;
 
@@ -96,6 +101,7 @@ public class CreateApplicationBundleMojo
      * The main class to execute when double-clicking the Application Bundle
      *
      * @parameter expression="${mainClass}"
+     * @required
      */
     private String mainClass;
 
@@ -112,14 +118,14 @@ public class CreateApplicationBundleMojo
     /**
      * The icon file for the bundle
      *
-     * @parameter expression="${iconFile}"
+     * @parameter
      */
     private File iconFile;
 
     /**
      * The version of the project. Will be used as the value of the CFBundleVersion key.
      *
-     * @parameter expression="${project.version}"
+     * @parameter default-value="${project.version}"
      */
     private String version;
 
@@ -133,7 +139,7 @@ public class CreateApplicationBundleMojo
     /**
      * The location of the produced Zip file containing the bundle.
      *
-     * @parameter expression="${project.build.directory}/${project.build.finalName}-app.zip"
+     * @parameter default-value="${project.build.directory}/${project.build.finalName}-app.zip"
      */
     private File zipFile;
 
@@ -165,14 +171,6 @@ public class CreateApplicationBundleMojo
     private VelocityComponent velocity;
 
     /**
-     * Main class finder.
-     *
-     * @parameter expression="${component.org.codehaus.plexus.mainclass.MainClassFinder#default}"
-     * @readonly
-     */
-    private MainClassFinder mainClassFinder;
-
-    /**
      * The location of the template for Info.plist.
      * Classpath is checked before the file system.
      *
@@ -183,7 +181,7 @@ public class CreateApplicationBundleMojo
     /**
      * Options to the JVM, will be used as the value of VMOptions in Info.plist.
      *
-     * @parameter expression="${vmOptions}"
+     * @parameter
      */
     private String vmOptions;
 
@@ -192,6 +190,7 @@ public class CreateApplicationBundleMojo
      * The Zip archiver.
      *
      * @component
+     * @readonly
      */
     private MavenProjectHelper projectHelper;
 
@@ -200,6 +199,7 @@ public class CreateApplicationBundleMojo
      *
      * @parameter expression="${component.org.codehaus.plexus.archiver.Archiver#zip}"
      * @required
+     * @readonly
      */
     private ZipArchiver zipArchiver;
 
@@ -207,7 +207,7 @@ public class CreateApplicationBundleMojo
      * If this is set to <code>true</code>, the generated DMG file will be internet-enabled.
      * The default is ${false}
      *
-     * @parameter expression="${internetEnable}" default-value="false"
+     * @parameter default-value="false"
      */
     private boolean internetEnable;
 
@@ -486,42 +486,7 @@ public class CreateApplicationBundleMojo
 
         VelocityContext velocityContext = new VelocityContext();
 
-        if ( mainClass != null )
-        {
-            velocityContext.put( "mainClass", mainClass );
-        }
-        else
-        {
-            getLog().info( "No mainClass parameter specified, scanning classes.." );
-            List mainClasses = findMainClasses();
-            if ( mainClasses.size() == 0 )
-            {
-                throw new MojoExecutionException(
-                    "You did not specify a mainClass and class with a main class could be found" );
-            }
-            else
-            {
-                getLog().info( "Found main classes " + mainClasses.toString() );
-                MainClass mainClass = (MainClass) mainClasses.get( 0 );
-                if ( mainClass.getClassLocation().isDirectory() )
-                {
-                    getLog().info(
-                        "Using main class " + mainClass.getClassName() + " from " + mainClass.getClassLocation() );
-                }
-                else
-                {
-                    Artifact artifact = getArtifact( mainClass.getClassLocation() );
-                    if(artifact == null) {
-                           getLog().info( "Using main class " + mainClass.getClassName());
-                    } else {
-                        getLog().info( "Using main class " + mainClass.getClassName() + " from " + artifact.toString() +
-                            " in " + artifact.getFile() );
-                    }
-                }
-                velocityContext.put( "mainClass", mainClass.getClassName() );
-            }
-        }
-
+        velocityContext.put( "mainClass", mainClass );
         velocityContext.put( "cfBundleExecutable", javaApplicationStub.getName());
         velocityContext.put( "vmOptions", vmOptions);
         velocityContext.put( "bundleName", bundleName );
@@ -561,8 +526,14 @@ public class CreateApplicationBundleMojo
         try
         {
 
-            FileWriter writer = new FileWriter( infoPlist );
-            velocity.getEngine().mergeTemplate( dictionaryFile, "utf-8", velocityContext, writer );
+            String encoding = detectEncoding(dictionaryFile, velocityContext);
+
+            getLog().debug( "Detected encoding " + encoding + " for dictionary file " +dictionaryFile  );
+
+            Writer writer = new OutputStreamWriter( new FileOutputStream(infoPlist), encoding );
+
+            velocity.getEngine().mergeTemplate( dictionaryFile, encoding, velocityContext, writer );
+
             writer.close();
         }
         catch ( IOException e )
@@ -589,39 +560,12 @@ public class CreateApplicationBundleMojo
 
     }
 
-    /**
-     * Search for the artifact owning artifactFile
-     * @param artifactFile
-     * @return the artifact or <code>null</code> if no matching artifact was found.
-     */
-    private Artifact getArtifact( File artifactFile )
+    private String detectEncoding( String dictionaryFile, VelocityContext velocityContext )
+        throws Exception
     {
-        for ( Iterator i = project.getArtifacts().iterator(); i.hasNext(); )
-        {
-            Artifact artifact = (Artifact) i.next();
-            if ( artifactFile.equals( artifact.getFile() ) )
-            {
-                return artifact;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Sets up a classpath with project classes followed by dependency classes and uses a MainClassFinder to
-     * search for main classes.
-     * @return
-     */
-    private List findMainClasses()
-    {
-        List classPath = new ArrayList();
-        classPath.add( project.getArtifact().getFile() );
-        for ( Iterator i = project.getArtifacts().iterator(); i.hasNext(); )
-        {
-            Artifact artifact = (Artifact) i.next();
-            classPath.add( artifact.getFile() );
-        }
-        return mainClassFinder.findMainClasses( classPath );
+        StringWriter sw = new StringWriter();
+        velocity.getEngine().mergeTemplate( dictionaryFile, "utf-8", velocityContext, sw );
+        return new DefaultEncodingDetector().detectXmlEncoding( new ByteArrayInputStream(sw.toString().getBytes( "utf-8" )) );
     }
 
     /**

@@ -7,11 +7,20 @@
 	</properties>
 	<body>
 		<release version="1.0-alpha-2-SNAPSHOT" date="in SVN">
+      <action dev="eirbjo" type="fix" issue="MOJO-1046" due-to="Max Berger">
+        Bundle creation fails on OS X without developer tools installed
+      </action>
+      <action dev="eirbjo" type="add" issue="MOJO-1117">
+        Allow additional resources to be included in the zip/dmg distributions
+      </action>
+      <action dev="eirbjo" type="add" issue="MOJO-1171">
+        Add a .DS_Store how-to on the project website.
+      </action>
+      <action dev="eirbjo" type="fix" issue="MOJO-946">
+        Don't hardcode the CFBundleExecutable name to "JavaApplicationStub"
+      </action>
       <action dev="eirbjo" type="add">
         Attach DMG and ZIP files so that they are installed/deployed.
-      </action>
-      <action dev="eirbjo" type="add" due-to="Oleksandr Maksymchuk" issue="MOJO-945">
-        Add flag to internet-enable the DMG.
       </action>
       <action dev="eirbjo" type="add" due-to="Oleksandr Maksymchuk" issue="MOJO-945">
 				Add flag to internet-enable the DMG.
