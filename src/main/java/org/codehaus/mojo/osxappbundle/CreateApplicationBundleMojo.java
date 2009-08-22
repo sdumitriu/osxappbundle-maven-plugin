@@ -317,7 +317,8 @@ public class CreateApplicationBundleMojo
                 try
                 {
                     setFile.setExecutable(SET_FILE_PATH);
-                    setFile.createArgument().setValue( "-a B" );
+                    setFile.createArgument().setValue( "-a" );
+                    setFile.createArgument().setValue( "B" );
                     setFile.createArgument().setValue( bundleDir.getAbsolutePath() );
 
                     setFile.execute();
