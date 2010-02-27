@@ -212,6 +212,12 @@ public class CreateApplicationBundleMojo
     private boolean internetEnable;
 
     /**
+     * Comma separated list of ArtifactIds to exclude from the dependency copy.
+     * @parameter default-value=""
+     */
+    private Set excludeArtifactIds;
+    
+    /**
      * The path to the SetFile tool.
      */
     private static final String SET_FILE_PATH = "/Developer/Tools/SetFile";
@@ -466,6 +472,13 @@ public class CreateApplicationBundleMojo
         while ( i.hasNext() )
         {
             Artifact artifact = (Artifact) i.next();
+            
+            String artifactId = artifact.getArtifactId();
+            if (excludeArtifactIds != null && excludeArtifactIds.contains(artifactId))
+            {
+                getLog().info( "Skipping excluded artifact: " + artifact.toString() );
+                continue;
+            }
 
             File file = artifact.getFile();
             File dest = new File(repoDirectory, layout.pathOf(artifact));
