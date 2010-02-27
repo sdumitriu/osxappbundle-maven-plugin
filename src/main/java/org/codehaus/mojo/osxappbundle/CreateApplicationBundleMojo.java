@@ -444,15 +444,19 @@ public class CreateApplicationBundleMojo
 
         // First, copy the project's own artifact
         File artifactFile = project.getArtifact().getFile();
-        list.add( repoDirectory.getName() +"/" +layout.pathOf(project.getArtifact()));
 
-        try
-        {
-            FileUtils.copyFile( artifactFile, new File(repoDirectory, layout.pathOf(project.getArtifact())) );
-        }
-        catch ( IOException e )
-        {
-            throw new MojoExecutionException( "Could not copy artifact file " + artifactFile + " to " + javaDirectory );
+        // Pom modules have no artifact file 
+        if(artifactFile != null) {
+            list.add( repoDirectory.getName() +"/" +layout.pathOf(project.getArtifact()));
+
+            try
+            {
+                FileUtils.copyFile( artifactFile, new File(repoDirectory, layout.pathOf(project.getArtifact())) );
+            }
+            catch ( IOException e )
+            {
+                throw new MojoExecutionException( "Could not copy artifact file " + artifactFile + " to " + javaDirectory );
+            }
         }
 
         Set artifacts = project.getArtifacts();
