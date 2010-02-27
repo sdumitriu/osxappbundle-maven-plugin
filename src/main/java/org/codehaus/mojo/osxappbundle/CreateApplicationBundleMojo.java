@@ -229,7 +229,7 @@ public class CreateApplicationBundleMojo
         // Set up and create directories
         buildDirectory.mkdirs();
 
-        File bundleDir = new File( buildDirectory, bundleName + ".app" );
+        File bundleDir = new File( buildDirectory, cleanBundleName(bundleName) + ".app" );
         bundleDir.mkdirs();
 
         File contentsDir = new File( bundleDir, "Contents" );
@@ -409,6 +409,16 @@ public class CreateApplicationBundleMojo
 
     }
 
+    /**
+     * The bundle name is used in paths, so we need to clean it for
+     * unwanted characters, like ":" on Windows.
+     * @param bundleName the "unclean" bundle name.
+     * @return a clean bundle name
+     */
+    private String cleanBundleName(String bundleName) {
+        return bundleName.replace(':', '-');
+    }
+
     private boolean isOsX()
     {
         return System.getProperty( "mrj.version" ) != null;
@@ -490,7 +500,7 @@ public class CreateApplicationBundleMojo
         velocityContext.put( "mainClass", mainClass );
         velocityContext.put( "cfBundleExecutable", javaApplicationStub.getName());
         velocityContext.put( "vmOptions", vmOptions);
-        velocityContext.put( "bundleName", bundleName );
+        velocityContext.put( "bundleName", cleanBundleName(bundleName) );
 
         velocityContext.put( "iconFile", iconFile == null ? "GenericJavaApp.icns" : iconFile.getName() );
 
