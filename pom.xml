@@ -10,7 +10,7 @@
 
   <artifactId>osxappbundle-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
-  <version>1.0-alpha-3</version>
+  <version>1.0-alpha-4-SNAPSHOT</version>
   <licenses>
     <license>
       <name>The Apache Software License, Version 2.0</name>
@@ -28,9 +28,9 @@
   </prerequisites>
 
   <scm>
-    <connection>scm:svn:http://svn.codehaus.org/mojo/tags/osxappbundle-maven-plugin-1.0-alpha-3</connection>
-    <developerConnection>scm:svn:https://svn.codehaus.org/mojo/tags/osxappbundle-maven-plugin-1.0-alpha-3</developerConnection>
-    <url>http://fisheye.codehaus.org/browse/mojo/tags/osxappbundle-maven-plugin-1.0-alpha-3</url>
+    <connection>scm:svn:http://svn.codehaus.org/mojo/trunk/mojo/osxappbundle-maven-plugin</connection>
+    <developerConnection>scm:svn:https://svn.codehaus.org/mojo/trunk/mojo/osxappbundle-maven-plugin</developerConnection>
+    <url>http://fisheye.codehaus.org/browse/mojo/trunk/mojo/osxappbundle-maven-plugin</url>
   </scm>
   
   <developers>
