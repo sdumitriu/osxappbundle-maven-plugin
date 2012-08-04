@@ -218,9 +218,14 @@ public class CreateApplicationBundleMojo
     private Set excludeArtifactIds;
     
     /**
-     * The path to the SetFile tool.
+     * The path to the SetFile tool when installed manually.
      */
     private static final String SET_FILE_PATH = "/Developer/Tools/SetFile";
+
+    /**
+     * The path to the SetFile tool when installed using the App Store.
+     */
+    private static final String ALT_SET_FILE_PATH = "/Applications/Xcode.app/Contents/Developer/Tools/SetFile";
 
 
     /**
@@ -316,13 +321,19 @@ public class CreateApplicationBundleMojo
                 throw new MojoExecutionException( "Error executing " + chmod + " ", e );
             }
 
+            String setFilePath = SET_FILE_PATH;
+            if ( !new File( setFilePath ).exists() )
+            {
+                setFilePath = ALT_SET_FILE_PATH;
+            }
+
             // This makes sure that the .app dir is actually registered as an application bundle
-            if ( new File( SET_FILE_PATH ).exists() )
+            if ( new File( setFilePath ).exists() )
             {
                 Commandline setFile = new Commandline();
                 try
                 {
-                    setFile.setExecutable(SET_FILE_PATH);
+                    setFile.setExecutable( setFilePath );
                     setFile.createArgument().setValue( "-a" );
                     setFile.createArgument().setValue( "B" );
                     setFile.createArgument().setValue( bundleDir.getAbsolutePath() );
@@ -336,7 +347,7 @@ public class CreateApplicationBundleMojo
             }
             else
             {
-                getLog().warn( "Could  not set 'Has Bundle' attribute. " +SET_FILE_PATH +" not found, is Developer Tools installed?" );
+                getLog().warn( "Could  not set 'Has Bundle' attribute. " + setFilePath + " not found, is Xcode installed?" );
             }
             // Create a .dmg file of the app
             Commandline dmg = new Commandline();
