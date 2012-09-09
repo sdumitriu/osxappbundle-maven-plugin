@@ -38,14 +38,17 @@ Using a custom Info.plist file
  </project>
 +------------------------------------------+
 
- Your custom dictionary may contain the following variables:
+ Your custom dictionary may contain any of the following variables::
 
 ----------------------------------
 ${bundleName}   (As defined in your POM. Default is the Maven name in your POM)
 ${mainClass}   (Your mainClass defined in the plugin configuration of your POM)
 ${iconFile}  (As defined in your POM. Defaults to a generic Application Icon)
 ${classpath}   (An <array> containing all you classpath entries, used as the value of the ClassPath key)
-
+${jvmVersion}  (As defined in your POM. Defaults to 1.4+)
+${version}  (The project version as defined in your POM.)
+${vmOptions}  (As defined in your POM.)
+${cfBundleExecutable}  (The final part of your configuration for <javaApplicationStub>. Defaults to JavaApplicationStub)
 ----------------------------------
 
 Info.plist example
@@ -60,7 +63,7 @@ Info.plist example
     <key>CFBundleName</key>
     <string>${bundleName}</string>
     <key>CFBundleVersion</key>
-    <string>10.2</string>
+    <string>${version}</string>
     <key>CFBundleAllowMixedLocalizations</key>
     <string>true</string>
     <key>CFBundleExecutable</key>
@@ -80,11 +83,11 @@ Info.plist example
       <key>MainClass</key>
       <string>${mainClass}</string>
       <key>JVMVersion</key>
-      <string>1.4+</string>
+      <string>${jvmVersion}</string>
       <key>ClassPath</key>
       ${classpath}
       <key>VMOptions</key>
-      <string>-Xmx512m -Xms128m</string>
+      <string>${vmOptions}</string>
       <key>Properties</key>
             <dict>
                 <key>apple.laf.useScreenMenuBar</key>
