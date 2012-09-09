@@ -19,7 +19,7 @@ Specifying the JVM version
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>osxappbundle-maven-plugin</artifactId>
-                <version>1.0-alpha-1</version>
+                <version>1.0-alpha-4</version>
                 <configuration>
                     <mainClass>com.example.Main</mainClass>
                     <jvmVersion>1.5+</jvmVersion>
