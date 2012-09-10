@@ -38,7 +38,6 @@ import org.codehaus.plexus.velocity.VelocityComponent;
 import org.codehaus.mojo.osxappbundle.encoding.DefaultEncodingDetector;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.ByteArrayInputStream;
@@ -48,6 +47,8 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.Arrays;
 
@@ -536,6 +537,8 @@ public class CreateApplicationBundleMojo
 
         velocityContext.put( "jvmVersion", jvmVersion );
 
+        addMavenPropertiesToVelocity( velocityContext );
+
         StringBuffer jarFilesBuffer = new StringBuffer();
 
         jarFilesBuffer.append( "<array>" );
@@ -595,6 +598,27 @@ public class CreateApplicationBundleMojo
         catch ( Exception e )
         {
             throw new MojoExecutionException( "Exception occured merging Info.plist template " + dictionaryFile, e );
+        }
+
+    }
+
+    private void addMavenPropertiesToVelocity( VelocityContext velocityContext )
+    {
+        Properties mavenProps = project.getProperties();
+        Iterator propertyIterator = mavenProps.entrySet().iterator();
+
+        while ( propertyIterator.hasNext() )
+        {
+            Map.Entry propertyEntry = (Map.Entry) propertyIterator.next();
+            String key = (String) propertyEntry.getKey();
+            String value = (String) propertyEntry.getValue();
+            if ( key.indexOf( "password" ) >= 0 || key.indexOf( "passphrase" ) >= 0 )
+            {
+                // we do not like to export sensible data!
+                continue;
+            }
+
+            velocityContext.put( "maven." + key, value );
         }
 
     }
