@@ -11,30 +11,30 @@ OS X Application Bundle Plugin
 
 * Goals Overview
 
-  * {{{bundle-mojo.html}osxappbundle:bundle}} Create an application bundle and put it in a DMG/ZIP
+  * {{{./bundle-mojo.html}osxappbundle:bundle}} Create an application bundle and put it in a DMG/ZIP
 
 * Examples
 
   To provide you with better understanding of some usages of the plugin,
   you can take a look into the following examples:
 
-  * {{{examples/directrun.html}Running directly from the command line}}
+  * {{{./examples/directrun.html}Running directly from the command line}}
 
-  * {{{examples/simple.html}Simple example with configuration in the POM}}
+  * {{{./examples/simple.html}Simple example with configuration in the POM}}
 
-  * {{{examples/custom-icon.html}Specifying a custom icon}}
+  * {{{./examples/custom-icon.html}Specifying a custom icon}}
 
-  * {{{examples/jvmversion.html}Specifying which version of the JVM to use}}
+  * {{{./examples/jvmversion.html}Specifying which version of the JVM to use}}
 
-  * {{{examples/crossplatform.html}Building on other platforms}}
+  * {{{./examples/crossplatform.html}Building on other platforms}}
 
-  * {{{examples/custom-dictionary.html}Using a custom Info.plist file}} (Advanced)
+  * {{{./examples/custom-dictionary.html}Using a custom Info.plist file}} (Advanced)
 
-  * {{{examples/additional-resources.html}Adding additional resources (README files etc) to your distribution}} (Advanced)
+  * {{{./examples/additional-resources.html}Adding additional resources (README files etc) to your distribution}} (Advanced)
 
 * Howtos
 
-  * {{{howtos/ds-store.html} How to create a custom view for a dmg bundle}}
+  * {{{./howtos/ds-store.html} How to create a custom view for a dmg bundle}}
   
 * Related links
 
