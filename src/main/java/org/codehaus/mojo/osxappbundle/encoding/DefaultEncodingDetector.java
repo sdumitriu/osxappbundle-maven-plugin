@@ -32,7 +32,7 @@ public class DefaultEncodingDetector
     implements EncodingDetector
 {
 
-    private Pattern pattern = Pattern.compile( "<?(xml|XML).*encoding=\"(.*)\""); //.*encoding=\"(.*)\"" );
+    private Pattern pattern = Pattern.compile( "<?(xml|XML).*encoding=\"(.*)\"");
 
     private static final String DEFAULT_ENCODING = "utf-8";
 
