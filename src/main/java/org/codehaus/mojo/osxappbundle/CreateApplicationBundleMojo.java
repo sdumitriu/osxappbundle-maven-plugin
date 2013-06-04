@@ -146,7 +146,7 @@ public class CreateApplicationBundleMojo
 
     /**
      * Paths to be put on the classpath in addition to the projects dependencies.
-     * Might be useful to specifiy locations of dependencies in the provided scope that are not distributed with
+     * Might be useful to specify locations of dependencies in the provided scope that are not distributed with
      * the bundle but have a known location on the system.
      * {@see http://jira.codehaus.org/browse/MOJO-874}
      *
@@ -156,7 +156,7 @@ public class CreateApplicationBundleMojo
 
     /**
      * Additional resources (as a list of FileSet objects) that will be copies into
-     * the build directory and included in the .dmg and zip files alongside with the
+     * the build directory and included in the .dmg and .zip files alongside with the
      * application bundle.
      *
      * @parameter
@@ -292,7 +292,7 @@ public class CreateApplicationBundleMojo
             }
         }
 
-        // Resolve and copy in all dependecies from the pom
+        // Resolve and copy in all dependencies from the pom
         List files = copyDependencies( javaDirectory );
 
         // Create and write the Info.plist file
@@ -463,7 +463,7 @@ public class CreateApplicationBundleMojo
         // First, copy the project's own artifact
         File artifactFile = project.getArtifact().getFile();
 
-        // Pom modules have no artifact file 
+        // Pom modules have no artifact file
         if(artifactFile != null) {
             list.add( repoDirectory.getName() +"/" +layout.pathOf(project.getArtifact()));
 
@@ -635,7 +635,7 @@ public class CreateApplicationBundleMojo
      * Copies given resources to the build directory. 
      *
      * @param fileSets A list of FileSet objects that represent additional resources to copy.
-     * @throws MojoExecutionException In case af a resource copying error.
+     * @throws MojoExecutionException In case of a resource copying error.
      */
     private void copyResources( List fileSets )
         throws MojoExecutionException
