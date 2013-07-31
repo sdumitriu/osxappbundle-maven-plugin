@@ -219,15 +219,13 @@ public class CreateApplicationBundleMojo
     private Set excludeArtifactIds;
     
     /**
-     * The path to the SetFile tool when installed manually.
+     * Possible locations where the SetFile tool can be.
      */
-    private static final String SET_FILE_PATH = "/Developer/Tools/SetFile";
-
-    /**
-     * The path to the SetFile tool when installed using the App Store.
-     */
-    private static final String ALT_SET_FILE_PATH = "/Applications/Xcode.app/Contents/Developer/Tools/SetFile";
-
+    private static final String[] SET_FILE_LOCATIONS = new String[]{
+        "/usr/bin/SetFile",
+        "/Developer/Tools/SetFile",
+        "/Applications/Xcode.app/Contents/Developer/Tools/SetFile"
+    };
 
     /**
      * Bundle project as a Mac OS X application bundle.
@@ -322,14 +320,18 @@ public class CreateApplicationBundleMojo
                 throw new MojoExecutionException( "Error executing " + chmod + " ", e );
             }
 
-            String setFilePath = SET_FILE_PATH;
-            if ( !new File( setFilePath ).exists() )
+            String setFilePath = null;
+            for ( int i = 0; i < SET_FILE_LOCATIONS.length; ++i )
             {
-                setFilePath = ALT_SET_FILE_PATH;
+                if ( new File( SET_FILE_LOCATIONS[i] ).exists() )
+                {
+                    setFilePath = SET_FILE_LOCATIONS[i];
+                    break;
+                }
             }
 
             // This makes sure that the .app dir is actually registered as an application bundle
-            if ( new File( setFilePath ).exists() )
+            if ( setFilePath != null )
             {
                 Commandline setFile = new Commandline();
                 try
