@@ -350,7 +350,7 @@ public class CreateApplicationBundleMojo
             }
             else
             {
-                getLog().warn( "Could  not set 'Has Bundle' attribute. " + setFilePath + " not found, is Xcode installed?" );
+                getLog().warn( "Could  not set 'Has Bundle' attribute. SetFile not found, is Xcode installed?" );
             }
             // Create a .dmg file of the app
             Commandline dmg = new Commandline();
