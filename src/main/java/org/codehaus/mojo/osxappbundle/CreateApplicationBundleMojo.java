@@ -653,6 +653,8 @@ public class CreateApplicationBundleMojo
             // The source directory
             dmg.createArgument().setValue( "-srcfolder" );
             dmg.createArgument().setFile( buildDirectory );
+            // The target image file; overwrite if it exists
+            dmg.createArgument().setValue( "-ov" );
             dmg.createArgument().setFile( targetFile );
 
             dmg.execute().waitFor();
