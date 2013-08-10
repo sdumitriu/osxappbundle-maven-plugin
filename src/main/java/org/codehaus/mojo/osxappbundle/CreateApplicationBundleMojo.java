@@ -637,21 +637,20 @@ public class CreateApplicationBundleMojo
         {
             dmg.setExecutable( "hdiutil" );
             dmg.createArgument().setValue( "create" );
+            // The source directory
             dmg.createArgument().setValue( "-srcfolder" );
             dmg.createArgument().setFile( buildDirectory );
             dmg.createArgument().setFile( targetFile );
-            try
-            {
-                dmg.execute().waitFor();
-            }
-            catch ( InterruptedException e )
-            {
-                throw new MojoExecutionException( "Thread was interrupted while creating DMG " + diskImageFile, e );
-            }
+
+            dmg.execute().waitFor();
         }
         catch ( CommandLineException e )
         {
             throw new MojoExecutionException( "Error creating disk image " + diskImageFile, e );
+        }
+        catch ( InterruptedException e )
+        {
+            throw new MojoExecutionException( "Thread was interrupted while creating DMG " + diskImageFile, e );
         }
         if(internetEnable) {
             try {
