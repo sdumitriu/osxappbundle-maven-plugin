@@ -115,13 +115,19 @@ public class CreateApplicationBundleMojo
      */
     private String bundleName;
 
-
     /**
      * The icon file for the bundle
      *
      * @parameter
      */
     private File iconFile;
+
+    /**
+     * The label of the volume. This is the name that will appear in Finder when mounting the disk image.
+     *
+     * @parameter
+     */
+    private String volumeLabel;
 
     /**
      * The version of the project. Will be used as the value of the CFBundleVersion key.
@@ -641,6 +647,9 @@ public class CreateApplicationBundleMojo
             // and we don't know what type that might be. For reproducible builds always use a specific type.
             dmg.createArgument().setValue( "-fs" );
             dmg.createArgument().setValue( "HFS+" );
+            // Set the volume label
+            dmg.createArgument().setValue( "-volname" );
+            dmg.createArgument().setValue( volumeLabel != null ? volumeLabel : bundleName );
             // The source directory
             dmg.createArgument().setValue( "-srcfolder" );
             dmg.createArgument().setFile( buildDirectory );
