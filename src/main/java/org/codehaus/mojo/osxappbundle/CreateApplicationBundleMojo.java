@@ -130,6 +130,13 @@ public class CreateApplicationBundleMojo
     private String volumeLabel;
 
     /**
+     * The icon file for the DMG image.
+     *
+     * @parameter
+     */
+    private File volumeIconFile;
+
+    /**
      * The version of the project. Will be used as the value of the CFBundleVersion key.
      *
      * @parameter default-value="${project.version}"
@@ -339,6 +346,20 @@ public class CreateApplicationBundleMojo
 
         if ( isOsX() )
         {
+            // Copy the volume icon file if specified
+            if ( volumeIconFile != null )
+            {
+                try
+                {
+                    getLog().info("Copying volume icon file");
+                    FileUtils.copyFile( volumeIconFile, new File( buildDirectory, ".VolumeIcon.icns" ) );
+                }
+                catch ( IOException e )
+                {
+                    throw new MojoExecutionException( "Error copying file " + volumeIconFile + " to " + buildDirectory, e );
+                }
+            }
+
             // This makes sure that the .app dir is actually registered as an application bundle
             setFileAttributes(bundleDir, "B");
 
@@ -639,10 +660,24 @@ public class CreateApplicationBundleMojo
     {
         getLog().info("Building DMG: " + diskImageFile.getAbsolutePath());
         Commandline dmg = new Commandline();
+        boolean needsRemount = volumeIconFile != null && volumeIconFile.exists();
+        File targetFile = diskImageFile;
+        if (needsRemount) {
+            try {
+                targetFile = File.createTempFile( "image", ".dmg", diskImageFile.getParentFile() );
+            } catch (IOException e) {
+                getLog().error("Failed to create image file: " + e.getMessage(), e);
+            }
+        }
         try
         {
             dmg.setExecutable( "hdiutil" );
             dmg.createArgument().setValue( "create" );
+            // The image type:
+            // - read-write if we have to set a custom volume icon
+            // - zip compressed, read-only archive otherwise
+            dmg.createArgument().setValue( "-format" );
+            dmg.createArgument().setValue( needsRemount ? "UDRW" : "UDZO" );
             // The partition type: force HFS+ since otherwise the type of the source folder will be used,
             // and we don't know what type that might be. For reproducible builds always use a specific type.
             dmg.createArgument().setValue( "-fs" );
@@ -658,6 +693,38 @@ public class CreateApplicationBundleMojo
             dmg.createArgument().setFile( targetFile );
 
             dmg.execute().waitFor();
+
+            if (needsRemount) {
+                // First step: mount the image
+                dmg.clearArgs();
+                dmg.createArgument().setValue( "attach" );
+                dmg.createArgument().setFile( targetFile );
+                dmg.createArgument().setValue( "-mountpoint" );
+                dmg.createArgument().setFile( buildDirectory );
+                dmg.execute().waitFor();
+
+                // Second step: set the HasIcon flag
+                setFileAttributes( buildDirectory, "C" );
+
+                // Third step: unmount the image
+                dmg.clearArgs();
+                dmg.createArgument().setValue( "detach" );
+                dmg.createArgument().setFile( buildDirectory );
+                dmg.execute().waitFor();
+
+                // Fourth step: make the image read-only
+                dmg.clearArgs();
+                dmg.createArgument().setValue( "convert" );
+                dmg.createArgument().setFile( targetFile );
+                dmg.createArgument().setValue( "-format" );
+                dmg.createArgument().setValue( "UDZO" );
+                dmg.createArgument().setValue( "-o" );
+                dmg.createArgument().setFile( diskImageFile );
+                dmg.execute().waitFor();
+
+                // Clean up: remove the temporary image
+                targetFile.delete();
+            }
         }
         catch ( CommandLineException e )
         {
