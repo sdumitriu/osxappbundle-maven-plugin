@@ -144,6 +144,13 @@ public class CreateApplicationBundleMojo
     private File volumeBackgroundFile;
 
     /**
+     * Should a link to the Applications folder be created?
+     *
+     * @parameter default-value="false"
+     */
+    private boolean includeApplicationsSymlink;
+
+    /**
      * The version of the project. Will be used as the value of the CFBundleVersion key.
      *
      * @parameter default-value="${project.version}"
@@ -381,6 +388,30 @@ public class CreateApplicationBundleMojo
                 catch ( IOException e )
                 {
                     throw new MojoExecutionException( "Error copying file " + volumeBackgroundFile + " to " + buildDirectory, e );
+                }
+            }
+
+            // Create a symlink to /Applications
+            if (includeApplicationsSymlink)
+            {
+                Commandline link = new Commandline();
+                try
+                {
+                    link.setExecutable( "ln" );
+                    link.createArgument().setValue( "-s" );
+                    link.createArgument().setValue( "/Applications" );
+                    link.createArgument().setFile( new File( buildDirectory, " " ) );
+
+                    getLog().error(link.toString());
+                    link.execute().waitFor();
+                }
+                catch ( CommandLineException e )
+                {
+                    throw new MojoExecutionException( "Error executing " + link + " ", e );
+                }
+                catch ( InterruptedException e )
+                {
+                    throw new MojoExecutionException( "Error executing " + link + " ", e );
                 }
             }
 
