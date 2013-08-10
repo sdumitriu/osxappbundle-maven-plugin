@@ -279,16 +279,27 @@ public class CreateApplicationBundleMojo
             }
 
             throw new MojoExecutionException( message);
-            
+
         } else {
             try
             {
                 FileUtils.copyFile( javaApplicationStub, stub );
+
+                // Make the stub executable
+                Commandline chmod = new Commandline();
+                chmod.setExecutable( "chmod" );
+                chmod.createArgument().setValue( "755" );
+                chmod.createArgument().setFile( stub );
+                chmod.execute();
             }
             catch ( IOException e )
             {
                 throw new MojoExecutionException(
                     "Could not copy file " + javaApplicationStub + " to directory " + macOSDirectory, e );
+            }
+            catch ( CommandLineException e )
+            {
+                getLog().warn( "Failed to mark the Java stub as executable, application may not run properly." );
             }
         }
 
@@ -320,21 +331,6 @@ public class CreateApplicationBundleMojo
 
         if ( isOsX() )
         {
-            // Make the stub executable
-            Commandline chmod = new Commandline();
-            try
-            {
-                chmod.setExecutable( "chmod" );
-                chmod.createArgument().setValue( "755" );
-                chmod.createArgument().setValue( stub.getAbsolutePath() );
-
-                chmod.execute();
-            }
-            catch ( CommandLineException e )
-            {
-                throw new MojoExecutionException( "Error executing " + chmod + " ", e );
-            }
-
             // This makes sure that the .app dir is actually registered as an application bundle
             setFileAttributes(bundleDir, "B");
 
