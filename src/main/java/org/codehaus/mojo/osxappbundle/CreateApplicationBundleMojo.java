@@ -137,6 +137,13 @@ public class CreateApplicationBundleMojo
     private File volumeIconFile;
 
     /**
+     * The image file for the DMG background image.
+     *
+     * @parameter
+     */
+    private File volumeBackgroundFile;
+
+    /**
      * The version of the project. Will be used as the value of the CFBundleVersion key.
      *
      * @parameter default-value="${project.version}"
@@ -357,6 +364,23 @@ public class CreateApplicationBundleMojo
                 catch ( IOException e )
                 {
                     throw new MojoExecutionException( "Error copying file " + volumeIconFile + " to " + buildDirectory, e );
+                }
+            }
+
+            // Copy the volume background file if specified
+            if ( volumeBackgroundFile != null )
+            {
+                try
+                {
+                    getLog().info("Copying volume background file");
+                    File backgroundDirectory = new File( buildDirectory, ".background" );
+                    backgroundDirectory.mkdirs();
+                    FileUtils.copyFile( volumeBackgroundFile, new File( backgroundDirectory, "background.png" ) );
+                    setFileAttributes( backgroundDirectory, "V" );
+                }
+                catch ( IOException e )
+                {
+                    throw new MojoExecutionException( "Error copying file " + volumeBackgroundFile + " to " + buildDirectory, e );
                 }
             }
 
