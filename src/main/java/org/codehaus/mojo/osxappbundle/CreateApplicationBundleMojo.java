@@ -637,6 +637,10 @@ public class CreateApplicationBundleMojo
         {
             dmg.setExecutable( "hdiutil" );
             dmg.createArgument().setValue( "create" );
+            // The partition type: force HFS+ since otherwise the type of the source folder will be used,
+            // and we don't know what type that might be. For reproducible builds always use a specific type.
+            dmg.createArgument().setValue( "-fs" );
+            dmg.createArgument().setValue( "HFS+" );
             // The source directory
             dmg.createArgument().setValue( "-srcfolder" );
             dmg.createArgument().setFile( buildDirectory );
