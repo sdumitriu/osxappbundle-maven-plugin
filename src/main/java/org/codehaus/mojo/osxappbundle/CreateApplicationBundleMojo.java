@@ -402,7 +402,6 @@ public class CreateApplicationBundleMojo
                     link.createArgument().setValue( "/Applications" );
                     link.createArgument().setFile( new File( buildDirectory, " " ) );
 
-                    getLog().error(link.toString());
                     link.execute().waitFor();
                 }
                 catch ( CommandLineException e )
