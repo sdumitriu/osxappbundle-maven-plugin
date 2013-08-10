@@ -228,6 +228,21 @@ public class CreateApplicationBundleMojo
     };
 
     /**
+     * The location where the SetFile tool was found; or null if the tool wasn't found in any of the possible locations. 
+     */
+    private String setFilePath;
+    {
+        for ( int i = 0; i < SET_FILE_LOCATIONS.length; ++i )
+        {
+            if ( new File( SET_FILE_LOCATIONS[i] ).exists() )
+            {
+                setFilePath = SET_FILE_LOCATIONS[i];
+                break;
+            }
+        }
+    }
+
+    /**
      * Bundle project as a Mac OS X application bundle.
      *
      * @throws MojoExecutionException If an unexpected error occurs during packaging of the bundle.
@@ -320,38 +335,9 @@ public class CreateApplicationBundleMojo
                 throw new MojoExecutionException( "Error executing " + chmod + " ", e );
             }
 
-            String setFilePath = null;
-            for ( int i = 0; i < SET_FILE_LOCATIONS.length; ++i )
-            {
-                if ( new File( SET_FILE_LOCATIONS[i] ).exists() )
-                {
-                    setFilePath = SET_FILE_LOCATIONS[i];
-                    break;
-                }
-            }
-
             // This makes sure that the .app dir is actually registered as an application bundle
-            if ( setFilePath != null )
-            {
-                Commandline setFile = new Commandline();
-                try
-                {
-                    setFile.setExecutable( setFilePath );
-                    setFile.createArgument().setValue( "-a" );
-                    setFile.createArgument().setValue( "B" );
-                    setFile.createArgument().setValue( bundleDir.getAbsolutePath() );
+            setFileAttributes(bundleDir, "B");
 
-                    setFile.execute();
-                }
-                catch ( CommandLineException e )
-                {
-                    throw new MojoExecutionException( "Error executing " + setFile, e );
-                }
-            }
-            else
-            {
-                getLog().warn( "Could  not set 'Has Bundle' attribute. SetFile not found, is Xcode installed?" );
-            }
             // Create a .dmg file of the app
             Commandline dmg = new Commandline();
             try
@@ -712,4 +698,34 @@ public class CreateApplicationBundleMojo
         }
     }
 
+    /**
+     * Set special attributes on a file or directory, using the OS X specific SetFile tool.
+     *
+     * @param file the file or directory to alter
+     * @param attributes the attributes to set, as a set of character flags; see the SetTool manpage for possible values
+     */
+    private void setFileAttributes(File file, String attributes)
+    {
+        if ( setFilePath != null )
+        {
+            Commandline setFile = new Commandline();
+            try
+            {
+                setFile.setExecutable( setFilePath );
+                setFile.createArgument().setValue( "-a" );
+                setFile.createArgument().setValue( attributes );
+                setFile.createArgument().setFile( file );
+
+                setFile.execute();
+            }
+            catch ( CommandLineException e )
+            {
+                getLog().warn( "Error executing " + setFile, e );
+            }
+        }
+        else
+        {
+            getLog().warn( "Could  not set special file attributes. SetFile not found, is Xcode installed?" );
+        }
+    }
 }
