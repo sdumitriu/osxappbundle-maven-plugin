@@ -35,10 +35,80 @@
   </properties>
 
   <scm>
-    <connection>scm:svn:http://svn.codehaus.org/mojo/trunk/mojo/osxappbundle-maven-plugin</connection>
-    <developerConnection>scm:svn:https://svn.codehaus.org/mojo/trunk/mojo/osxappbundle-maven-plugin</developerConnection>
-    <url>http://fisheye.codehaus.org/browse/mojo/trunk/mojo/osxappbundle-maven-plugin</url>
+    <connection>scm:git:git://github.com/sdumitriu/osxappbundle-maven-plugin.git</connection>
+    <developerConnection>scm:git:git@github.com:sdumitriu/osxappbundle-maven-plugin.git</developerConnection>
+    <url>https://github.com/sdumitriu/osxappbundle-maven-plugin.git/tree/master/</url>
+    <tag>HEAD</tag>
   </scm>
+
+  <distributionManagement>
+    <site>
+      <id>nexus.cs.toronto.edu</id>
+      <url>dav:http://nexus.cs.toronto.edu/nexus/content/sites/site/${project.groupId}/${project.artifactId}/${project.version}</url>
+    </site>
+    <repository>
+      <id>nexus.cs.toronto.edu</id>
+      <name>Maven2 Remote Repository for Releases</name>
+      <url>http://nexus.cs.toronto.edu/nexus/content/repositories/externals</url>
+    </repository>
+    <snapshotRepository>
+      <id>nexus.cs.toronto.edu</id>
+      <name>Maven2 Development Repository for Snapshots</name>
+      <url>http://nexus.cs.toronto.edu/nexus/content/repositories/snapshots</url>
+    </snapshotRepository>
+  </distributionManagement>
+
+  <repositories>
+    <repository>
+      <id>uoft-releases</id>
+      <name>UofT Releases repository</name>
+      <url>http://nexus.cs.toronto.edu/nexus/content/repositories/releases/</url>
+      <releases>
+        <enabled>true</enabled>
+        <checksumPolicy>fail</checksumPolicy>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+        <checksumPolicy>fail</checksumPolicy>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>uoft-snapshots</id>
+      <name>UofT Releases repository</name>
+      <url>http://nexus.cs.toronto.edu/nexus/content/repositories/snapshots/</url>
+      <releases>
+        <enabled>false</enabled>
+        <checksumPolicy>fail</checksumPolicy>
+      </releases>
+      <snapshots>
+        <checksumPolicy>fail</checksumPolicy>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>uoft-externals</id>
+      <name>UofT external repositories mirror</name>
+      <url>http://nexus.cs.toronto.edu/nexus/content/groups/public/</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+  <pluginRepositories>
+    <pluginRepository>
+      <id>uoft-externals</id>
+      <name>UofT external repositories mirror</name>
+      <url>http://nexus.cs.toronto.edu/nexus/content/groups/public/</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </pluginRepository>
+  </pluginRepositories>
 
   <developers>
     <developer>
