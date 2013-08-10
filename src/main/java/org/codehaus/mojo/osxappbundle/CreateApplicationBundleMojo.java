@@ -329,6 +329,8 @@ public class CreateApplicationBundleMojo
             copyResources( additionalResources );
         }
 
+        createZip();
+
         if ( isOsX() )
         {
             // This makes sure that the .app dir is actually registered as an application bundle
@@ -374,39 +376,6 @@ public class CreateApplicationBundleMojo
             projectHelper.attachArtifact(project, "dmg", null, diskImageFile);
         }
 
-        zipArchiver.setDestFile( zipFile );
-        try
-        {
-            String[] stubPattern = {buildDirectory.getName() + "/" + bundleDir.getName() +"/Contents/MacOS/"
-                                    + javaApplicationStub.getName()};
-
-            zipArchiver.addDirectory( buildDirectory.getParentFile(), new String[]{buildDirectory.getName() + "/**"},
-                    stubPattern);
-
-            DirectoryScanner scanner = new DirectoryScanner();
-            scanner.setBasedir( buildDirectory.getParentFile() );
-            scanner.setIncludes( stubPattern);
-            scanner.scan();
-
-            String[] stubs = scanner.getIncludedFiles();
-            for ( int i = 0; i < stubs.length; i++ )
-            {
-                String s = stubs[i];
-                zipArchiver.addFile( new File( buildDirectory.getParentFile(), s ), s, 0755 );
-            }
-
-            zipArchiver.createArchive();
-            projectHelper.attachArtifact(project, "zip", null, zipFile);
-        }
-        catch ( ArchiverException e )
-        {
-            throw new MojoExecutionException( "Could not create zip archive of application bundle in " + zipFile, e );
-        }
-        catch ( IOException e )
-        {
-            throw new MojoExecutionException( "IOException creating zip archive of application bundle in " + zipFile,
-                                              e );
-        }
 
 
     }
@@ -691,6 +660,48 @@ public class CreateApplicationBundleMojo
                     throw new MojoExecutionException( "Error copying additional resource " + source, e );
                 }
             }
+        }
+    }
+
+    /**
+     * Create a .zip archive with the application.
+     *
+     * @throws MojoExecutionException if the operation is interrupted
+     */
+    private void createZip() throws MojoExecutionException
+    {
+        zipArchiver.setDestFile( zipFile );
+        try
+        {
+            String[] stubPattern = {buildDirectory.getName() + "/" + cleanBundleName(bundleName) + ".app/Contents/MacOS/"
+                                    + javaApplicationStub.getName()};
+
+            zipArchiver.addDirectory( buildDirectory.getParentFile(), new String[]{buildDirectory.getName() + "/**"},
+                    stubPattern);
+
+            DirectoryScanner scanner = new DirectoryScanner();
+            scanner.setBasedir( buildDirectory.getParentFile() );
+            scanner.setIncludes( stubPattern);
+            scanner.scan();
+
+            String[] stubs = scanner.getIncludedFiles();
+            for ( int i = 0; i < stubs.length; i++ )
+            {
+                String s = stubs[i];
+                zipArchiver.addFile( new File( buildDirectory.getParentFile(), s ), s, 0755 );
+            }
+
+            zipArchiver.createArchive();
+            projectHelper.attachArtifact(project, "zip", null, zipFile);
+        }
+        catch ( ArchiverException e )
+        {
+            throw new MojoExecutionException( "Could not create zip archive of application bundle in " + zipFile, e );
+        }
+        catch ( IOException e )
+        {
+            throw new MojoExecutionException( "IOException creating zip archive of application bundle in " + zipFile,
+                                              e );
         }
     }
 
