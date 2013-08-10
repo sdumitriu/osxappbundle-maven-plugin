@@ -336,48 +336,9 @@ public class CreateApplicationBundleMojo
             // This makes sure that the .app dir is actually registered as an application bundle
             setFileAttributes(bundleDir, "B");
 
-            // Create a .dmg file of the app
-            Commandline dmg = new Commandline();
-            try
-            {
-                dmg.setExecutable( "hdiutil" );
-                dmg.createArgument().setValue( "create" );
-                dmg.createArgument().setValue( "-srcfolder" );
-                dmg.createArgument().setValue( buildDirectory.getAbsolutePath() );
-                dmg.createArgument().setValue( diskImageFile.getAbsolutePath() );
-                try
-                {
-                    dmg.execute().waitFor();
-                }
-                catch ( InterruptedException e )
-                {
-                    throw new MojoExecutionException( "Thread was interrupted while creating DMG " + diskImageFile, e );
-                }
-            }
-            catch ( CommandLineException e )
-            {
-                throw new MojoExecutionException( "Error creating disk image " + diskImageFile, e );
-            }
-            if(internetEnable) {
-                try {
-
-                    Commandline internetEnable = new Commandline();
-
-                    internetEnable.setExecutable("hdiutil");
-                    internetEnable.createArgument().setValue("internet-enable" );
-                    internetEnable.createArgument().setValue("-yes");
-                    internetEnable.createArgument().setValue(diskImageFile.getAbsolutePath());
-
-                    internetEnable.execute();
-                } catch (CommandLineException e) {
-                    throw new MojoExecutionException("Error internet enabling disk image: " + diskImageFile, e);
-                }
-            }
-            projectHelper.attachArtifact(project, "dmg", null, diskImageFile);
+            // Create the DMG
+            createDMG();
         }
-
-
-
     }
 
     /**
@@ -661,6 +622,53 @@ public class CreateApplicationBundleMojo
                 }
             }
         }
+    }
+
+    /**
+     * Create a .dmg disk image with the application.
+     *
+     * @throws MojoExecutionException if the operation is interrupted
+     */
+    private void createDMG() throws MojoExecutionException
+    {
+        getLog().info("Building DMG: " + diskImageFile.getAbsolutePath());
+        Commandline dmg = new Commandline();
+        try
+        {
+            dmg.setExecutable( "hdiutil" );
+            dmg.createArgument().setValue( "create" );
+            dmg.createArgument().setValue( "-srcfolder" );
+            dmg.createArgument().setFile( buildDirectory );
+            dmg.createArgument().setFile( targetFile );
+            try
+            {
+                dmg.execute().waitFor();
+            }
+            catch ( InterruptedException e )
+            {
+                throw new MojoExecutionException( "Thread was interrupted while creating DMG " + diskImageFile, e );
+            }
+        }
+        catch ( CommandLineException e )
+        {
+            throw new MojoExecutionException( "Error creating disk image " + diskImageFile, e );
+        }
+        if(internetEnable) {
+            try {
+
+                Commandline internetEnable = new Commandline();
+
+                internetEnable.setExecutable("hdiutil");
+                internetEnable.createArgument().setValue("internet-enable" );
+                internetEnable.createArgument().setValue("-yes");
+                internetEnable.createArgument().setValue(diskImageFile.getAbsolutePath());
+
+                internetEnable.execute();
+            } catch (CommandLineException e) {
+                throw new MojoExecutionException("Error internet enabling disk image: " + diskImageFile, e);
+            }
+        }
+        projectHelper.attachArtifact(project, "dmg", null, diskImageFile);
     }
 
     /**
