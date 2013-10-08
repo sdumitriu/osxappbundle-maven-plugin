@@ -434,7 +434,7 @@ public class CreateApplicationBundleMojo
 
     private boolean isOsX()
     {
-        return System.getProperty( "mrj.version" ) != null;
+        return System.getProperty("os.name").indexOf("OS X") != -1;
     }
 
     /**
