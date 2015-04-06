@@ -1,0 +1,28 @@
+# Build
+target
+target-eclipse
+
+# IDEA
+*.iml
+*.ipr
+*.iws
+.idea
+atlassian-ide-plugin.xml
+
+# Eclipse
+.classpath
+.project
+.settings
+.checkstyle
+.fbprefs
+bin
+
+# NetBeans
+nbproject
+
+# Backup files
+*~
+
+# File manager settings
+.DS_Store
+.directory
